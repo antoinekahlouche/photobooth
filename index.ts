@@ -5,6 +5,8 @@ Bun.serve({
 
         if (path === "/") return new Response(Bun.file("./index.html"));
 
+        if (path === "/bg.png") return new Response(Bun.file("./bg.png"));
+
         if (req.method === "POST" && path === "/upload") {
             const formdata = await req.formData();
             const file = formdata.get("file");

@@ -1,73 +1,168 @@
-<html>
+<!doctype html>
+<html lang="fr">
     <head>
         <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-        <title>Photobooth</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-        <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
-        <link
-            rel="stylesheet"
-            href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css"
-            type="text/css"
-        />
+        <title>Wedding Photobooth</title>
 
         <style type="text/css">
+            @import url("https://fonts.googleapis.com/css2?family=Dynalight&display=swap");
+
+            html,
             body {
-                padding: 20px;
+                margin: 0;
+                width: 100vw;
+                height: 100vh;
             }
-            .dropzone {
-                border-radius: 5%;
-                padding: 10px;
-                text-align: center;
-                aspect-ratio: 1;
+
+            body {
                 display: flex;
+                flex-direction: column;
                 justify-content: center;
                 align-items: center;
+                background-image: url("bg.png");
+                background-repeat: no-repeat;
+                background-size: 100vw;
+
+                position: relative;
+                overflow: hidden;
             }
-            .dz-message {
-                color: #222;
-                font-size: 24px;
-                font-family: Inter, sans-serif;
-                font-weight: bold;
+
+            .title {
+                font-family: "Dynalight", serif;
+                font-size: 3.5rem;
+                font-weight: 300;
+                margin-bottom: 1rem;
+                text-align: center;
+            }
+
+            .subtitle {
+                font-family: "Inter", sans-serif;
+                font-size: 1.1rem;
+                margin-bottom: 3rem;
+                text-align: center;
+                font-weight: 300;
+            }
+
+            .camera-button {
+                background: #ddc988;
+                border: none;
+                border-radius: 50%;
+                width: 200px;
+                height: 200px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                cursor: pointer;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .camera-button:active {
+                transform: translateY(2px);
+            }
+
+            .camera-icon {
+                width: 60px;
+                height: 50px;
+                border: 3px solid #ffffff;
+                border-radius: 8px;
+                position: relative;
+                margin-bottom: 5px;
+            }
+
+            .camera-icon::before {
+                content: "";
+                position: absolute;
+                width: 20px;
+                height: 20px;
+                border: 3px solid #ffffff;
+                border-radius: 50%;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+
+            .camera-icon::after {
+                content: "";
+                position: absolute;
+                width: 8px;
+                height: 8px;
+                background: #ffffff;
+                border-radius: 50%;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
             }
         </style>
     </head>
     <body>
-        <div class="dropzone dz-clickable" id="myDropzone">
-            <div class="dz-default dz-message">
-                <span>Click ici !</span>
-            </div>
-        </div>
+        <h1 class="title">Marion &<br />Antoine</h1>
+        <p class="subtitle">Photobooth</p>
+
+        <button class="camera-button" onclick="openCamera()">
+            <div class="camera-icon"></div>
+        </button>
 
         <script type="text/javascript">
-            Dropzone.options.myDropzone = {
-                url: "/upload",
-                autoProcessQueue: true,
-                paramName: "file",
-                clickable: true,
-                capture: "camera",
-                init: function () {
-                    this.on("success", function (file) {
-                        setTimeout(() => {
-                            this.removeFile(file);
-                        }, 2000);
-                    });
-                },
-            };
-        </script>
+            function openCamera() {
+                const input = document.createElement("input");
+                input.type = "file";
+                input.accept = "image/*";
+                input.capture = "camera";
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        uploadPhoto(file);
+                    }
+                };
+                input.click();
+            }
 
-        <input
-            type="file"
-            class="dz-hidden-input"
-            accept=".png,.jpg"
-            style="
-                visibility: hidden;
-                position: absolute;
-                top: 0px;
-                left: 0px;
-                height: 0px;
-                width: 0px;
-            "
-        />
+            async function uploadPhoto(file) {
+                const formData = new FormData();
+                formData.append("file", file);
+
+                try {
+                    const response = await fetch("/upload", {
+                        method: "POST",
+                        body: formData,
+                    });
+
+                    if (response.ok) {
+                        showSuccessMessage();
+                    } else {
+                        showErrorMessage();
+                    }
+                } catch (_) {
+                    showErrorMessage();
+                }
+            }
+
+            function showSuccessMessage() {
+                const button = document.querySelector(".camera-button");
+                const originalContent = button.innerHTML;
+                button.innerHTML = '<div style="color: white; font-size: 3rem;">✓</div>';
+                button.style.background = "#C4D8C8";
+
+                setTimeout(() => {
+                    button.innerHTML = originalContent;
+                    button.style.background = "";
+                }, 2000);
+            }
+
+            function showErrorMessage() {
+                const button = document.querySelector(".camera-button");
+                const originalContent = button.innerHTML;
+                button.innerHTML = '<div style="color: white; font-size: 3rem;">✗</div>';
+                button.style.background = "#CD7C7F";
+
+                setTimeout(() => {
+                    button.innerHTML = originalContent;
+                    button.style.background = "";
+                }, 2000);
+            }
+        </script>
     </body>
 </html>
